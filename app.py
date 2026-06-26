@@ -13,7 +13,7 @@ SMTP_CONFIG = {
     "server": "smtp.gmail.com",
     "port": 587,
     "email": os.getenv("SENDER_EMAIL", "sssselvin0000987@gmail.com"),
-    "password": os.getenv("SENDER_APP_PASSWORD", "bacl uytq kxtb lyss")
+    "password": os.getenv("SENDER_APP_PASSWORD", "app password here")  # Use an app password for Gmail
 }
 
 OTP_EXPIRY_MINUTES = 5
