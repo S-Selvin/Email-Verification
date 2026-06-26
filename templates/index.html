@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Verification</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+        }
+
+        .icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+        }
+
+        .icon svg {
+            width: 40px;
+            height: 40px;
+            fill: white;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        /* Steps */
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Form Elements */
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        /* OTP Input Boxes */
+        .otp-inputs {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .otp-inputs input {
+            width: 50px;
+            height: 60px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .otp-inputs input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-link {
+            background: none;
+            color: #667eea;
+            margin-top: 15px;
+            text-decoration: underline;
+        }
+
+        /* Messages */
+        .message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .message.error {
+            background: #ffe6e6;
+            color: #d63031;
+            border: 1px solid #fab1a0;
+            display: block;
+        }
+
+        .message.success {
+            background: #e6ffe6;
+            color: #00b894;
+            border: 1px solid #55efc4;
+            display: block;
+        }
+
+        /* Timer */
+        .timer {
+            color: #666;
+            font-size: 14px;
+            margin-top: 15px;
+        }
+
+        .timer span {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        /* Success State */
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            background: #00b894;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            animation: scaleIn 0.5s ease;
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+
+        .success-icon svg {
+            width: 50px;
+            height: 50px;
+            fill: white;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .email-display {
+            background: #f5f5f5;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #333;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Step 1: Email Input -->
+        <div class="step active" id="step-email">
+            <div class="icon">
+                <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+            </div>
+            <h1>Verify Your Email</h1>
+            <p class="subtitle">We'll send you a one-time password</p>
+            
+            <div class="message" id="email-message"></div>
+            
+            <div class="input-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" placeholder="Enter your email" autocomplete="email">
+            </div>
+            
+            <button class="btn btn-primary" id="send-otp-btn" onclick="sendOTP()">
+                Send OTP
+            </button>
+        </div>
+
+        <!-- Step 2: OTP Verification -->
+        <div class="step" id="step-otp">
+            <div class="icon">
+                <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+            </div>
+            <h1>Enter OTP</h1>
+            <p class="subtitle">Check your email for the code</p>
+            
+            <div class="email-display" id="email-display"></div>
+            
+            <div class="message" id="otp-message"></div>
+            
+            <div class="otp-inputs">
+                <input type="text" maxlength="1" class="otp-digit" data-index="0" inputmode="numeric">
+                <input type="text" maxlength="1" class="otp-digit" data-index="1" inputmode="numeric">
+                <input type="text" maxlength="1" class="otp-digit" data-index="2" inputmode="numeric">
+                <input type="text" maxlength="1" class="otp-digit" data-index="3" inputmode="numeric">
+                <input type="text" maxlength="1" class="otp-digit" data-index="4" inputmode="numeric">
+                <input type="text" maxlength="1" class="otp-digit" data-index="5" inputmode="numeric">
+            </div>
+            
+            <button class="btn btn-primary" id="verify-btn" onclick="verifyOTP()">
+                Verify OTP
+            </button>
+            
+            <div class="timer" id="timer">
+                Resend available in <span id="countdown">60</span>s
+            </div>
+            
+            <button class="btn btn-link" id="resend-btn" onclick="resendOTP()" style="display: none;">
+                Resend OTP
+            </button>
+            
+            <button class="btn btn-link" onclick="goBack()">
+                ← Change Email
+            </button>
+        </div>
+
+        <!-- Step 3: Success -->
+        <div class="step" id="step-success">
+            <div class="success-icon">
+                <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            </div>
+            <h1>Verified!</h1>
+            <p class="subtitle">Your email has been successfully verified</p>
+            
+            <button class="btn btn-primary" onclick="location.reload()">
+                Done
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let countdownInterval;
+        let userEmail = '';
+
+        // OTP Input Handling
+        const otpInputs = document.querySelectorAll('.otp-digit');
+        
+        otpInputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                const value = e.target.value;
+                
+                // Only allow numbers
+                if (!/^\d*$/.test(value)) {
+                    e.target.value = '';
+                    return;
+                }
+                
+                // Move to next input
+                if (value && index < otpInputs.length - 1) {
+                    otpInputs[index + 1].focus();
+                }
+                
+                // Auto-submit when all filled
+                if (getOTP().length === 6) {
+                    verifyOTP();
+                }
+            });
+
+            input.addEventListener('keydown', (e) => {
+                // Handle backspace
+                if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                    otpInputs[index - 1].focus();
+                }
+            });
+
+            // Handle paste
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pastedData = e.clipboardData.getData('text').trim();
+                if (/^\d{6}$/.test(pastedData)) {
+                    otpInputs.forEach((inp, i) => {
+                        inp.value = pastedData[i];
+                    });
+                    otpInputs[5].focus();
+                    verifyOTP();
+                }
+            });
+        });
+
+        function getOTP() {
+            return Array.from(otpInputs).map(input => input.value).join('');
+        }
+
+        function clearOTP() {
+            otpInputs.forEach(input => input.value = '');
+            otpInputs[0].focus();
+        }
+
+        function showStep(stepId) {
+            document.querySelectorAll('.step').forEach(step => step.classList.remove('active'));
+            document.getElementById(stepId).classList.add('active');
+        }
+
+        function showMessage(elementId, message, type) {
+            const el = document.getElementById(elementId);
+            el.textContent = message;
+            el.className = `message ${type}`;
+        }
+
+        function clearMessage(elementId) {
+            const el = document.getElementById(elementId);
+            el.className = 'message';
+            el.textContent = '';
+        }
+
+        function setLoading(buttonId, loading) {
+            const btn = document.getElementById(buttonId);
+            if (loading) {
+                btn.disabled = true;
+                btn.dataset.originalText = btn.innerHTML;
+                btn.innerHTML = '<span class="spinner"></span>Processing...';
+            } else {
+                btn.disabled = false;
+                btn.innerHTML = btn.dataset.originalText;
+            }
+        }
+
+        function startCountdown() {
+            let seconds = 60;
+            const countdownEl = document.getElementById('countdown');
+            const timerEl = document.getElementById('timer');
+            const resendBtn = document.getElementById('resend-btn');
+            
+            timerEl.style.display = 'block';
+            resendBtn.style.display = 'none';
+            
+            clearInterval(countdownInterval);
+            countdownInterval = setInterval(() => {
+                seconds--;
+                countdownEl.textContent = seconds;
+                
+                if (seconds <= 0) {
+                    clearInterval(countdownInterval);
+                    timerEl.style.display = 'none';
+                    resendBtn.style.display = 'block';
+                }
+            }, 1000);
+        }
+
+        async function sendOTP() {
+            const email = document.getElementById('email').value.trim();
+            
+            if (!email) {
+                showMessage('email-message', 'Please enter your email address', 'error');
+                return;
+            }
+            
+            clearMessage('email-message');
+            setLoading('send-otp-btn', true);
+            
+            try {
+                const response = await fetch('/send-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    userEmail = email;
+                    document.getElementById('email-display').textContent = email;
+                    showStep('step-otp');
+                    startCountdown();
+                    otpInputs[0].focus();
+                } else {
+                    showMessage('email-message', data.message, 'error');
+                }
+            } catch (error) {
+                showMessage('email-message', 'Network error. Please try again.', 'error');
+            } finally {
+                setLoading('send-otp-btn', false);
+            }
+        }
+
+        async function verifyOTP() {
+            const otp = getOTP();
+            
+            if (otp.length !== 6) {
+                showMessage('otp-message', 'Please enter the complete 6-digit OTP', 'error');
+                return;
+            }
+            
+            clearMessage('otp-message');
+            setLoading('verify-btn', true);
+            
+            try {
+                const response = await fetch('/verify-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ otp })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    clearInterval(countdownInterval);
+                    showStep('step-success');
+                } else {
+                    showMessage('otp-message', data.message, 'error');
+                    clearOTP();
+                }
+            } catch (error) {
+                showMessage('otp-message', 'Network error. Please try again.', 'error');
+            } finally {
+                setLoading('verify-btn', false);
+            }
+        }
+
+        async function resendOTP() {
+            clearMessage('otp-message');
+            setLoading('resend-btn', true);
+            
+            try {
+                const response = await fetch('/resend-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('otp-message', 'New OTP sent!', 'success');
+                    startCountdown();
+                    clearOTP();
+                } else {
+                    showMessage('otp-message', data.message, 'error');
+                }
+            } catch (error) {
+                showMessage('otp-message', 'Network error. Please try again.', 'error');
+            } finally {
+                setLoading('resend-btn', false);
+            }
+        }
+
+        function goBack() {
+            clearInterval(countdownInterval);
+            clearOTP();
+            clearMessage('otp-message');
+            showStep('step-email');
+        }
+
+        // Enter key handling
+        document.getElementById('email').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendOTP();
+        });
+    </script>
+</body>
+</html>
